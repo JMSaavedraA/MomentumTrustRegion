@@ -2,4 +2,4 @@
 *.csv
 *.png
 julia_problems/*
-s2mpjl.jl
+s2mpjlib.jl

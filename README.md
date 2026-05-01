@@ -14,7 +14,7 @@ Julia implementation and experiment code used for the paper “A Momentum Trust-
 - Julia (paper used Julia 1.12.5; any recent 1.12.x should work)
 - Recommended packages: `Plots`, `CSV`, `DataFrames`, `StatsBase` (install below)
 - Standard library: `LinearAlgebra`, `DelimitedFiles`, `Base.Threads`
-- S2MPJ problem dataset (download from the official repository and copy the `julia_problems/` folder and 's2mpjl.jl' file into this repo root)
+- S2MPJ problem dataset (download from the official repository and copy the `julia_problems/` folder and 's2mpjlib.jl' file into this repo root)
 
 ## Quick start
 1. Open a terminal in the repository root (the folder containing this `README.md`).
