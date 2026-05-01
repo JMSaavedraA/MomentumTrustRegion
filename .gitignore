@@ -1,0 +1,5 @@
+# Ignore data and generated images
+*.csv
+*.png
+julia_problems/*
+s2mpjl.jl
