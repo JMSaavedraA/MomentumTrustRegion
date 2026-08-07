@@ -1,9 +1,16 @@
 using Base.Threads, Plots
 
+
 function initProblem(name::String)
     probfunc = getfield(Main, Symbol(name));
     pb, pbm = probfunc("setup")
     return pb, pbm, probfunc
+end
+
+function loadproblem(name::String)
+    # Load the problem from the file
+    filename = "julia_problems/$name.jl";
+    include(filename);
 end
 
 function checkConvergence(results::AbstractMatrix, algos::Vector{String})
@@ -79,25 +86,30 @@ function plot_and_save_profile(data::AbstractMatrix, algo_names::Vector{String},
         # Create fresh plot
         p = plot()
         for j in 1:length(algo_names)
-            plot!(p, logtaus, profiles[:, j], label=algo_names[j], lw=2, seriestype=:steppost, palette = :tab20, size = (1024, 1024))
+            plot!(p, logtaus, profiles[:, j], label=algo_names[j], lw=2, palette = :Dark2_8, seriestype=:steppost)
         end
 
         # Add plot styling
         plot!(p,
-              title = "Performance Profile: $label",
-              xlabel = "log(τ)",
-              ylabel = "ρ(τ)",
-              legend = :bottomright,
-              grid = :both,
-              size = (700, 500),
-              palette = :Dark2_8)
+            title = "Performance Profile: $label",
+            xlabel = "log(τ)",
+            ylabel = "ρ(τ)",
+            legend = :bottomright,
+            grid = :both,
+            size = (700, 500),
+            dpi = 1200,
+            titlefont = font(16, "Computer Modern"),
+            guidefont = font(12, "Computer Modern"),
+            tickfont = font(10, "Computer Modern"),
+            legendfont = font(10, "Computer Modern")
+            )
 
         # Ensure directory exists
         if !isdir(output_dir)
             mkpath(output_dir)
         end
 
-        filename = joinpath(output_dir, "performance_profile_$(lowercase(replace(label, ' ' => "_"))).png")
+        filename = joinpath(output_dir, "performance_profile_$(lowercase(replace(label, ' ' => "_"))).pdf")
         savefig(p, filename)
     end
 end
@@ -118,7 +130,7 @@ function compareMethods(functions::Vector{String},algos::Vector{String})
             algo_name = algos[j];
             algo = getfield(Main, Symbol(algo_name));
             try
-                t_local = @elapsed _, g, k, _, _ = algo(pb, pbm, probfunc);
+                t_local = @elapsed _, g, k, _, _, _, _ = algo(pb, pbm, probfunc);
             catch e
                 @info "$algo_name failed for $name: $e"
                 g = k = t_local = NaN;
@@ -128,4 +140,39 @@ function compareMethods(functions::Vector{String},algos::Vector{String})
         println("Function $name completed successfully.")
     end
     return results
+end
+
+function compareMethodsOneFunc(functionName::String,algos::Vector{String})
+    # Atomic variables for thread safety
+    m = length(algos);
+    pb, pbm, probfunc = initProblem(functionName);
+    allGrads = zeros(Float64, 100000, m);
+    allFVals = zeros(Float64, 100000, m);
+    allAcc = zeros(Float64, m);
+    allTimes = zeros(Float64, m);
+    allIters = zeros(Int, m);
+    @threads for j in 1:m
+        # Initialize all outputs as NaN
+        g = t = acc = 0.0;
+        k = 0;
+        G = zeros(Float64, 100000);
+        F = zeros(Float64, 100000);
+        algo_name = algos[j];
+        algo = getfield(Main, Symbol(algo_name));
+        try
+            t = @elapsed _, _, k, _, G, F, acc = algo(pb, pbm, probfunc);
+        catch e
+            @info "$algo_name failed for $functionName: $e"
+            g = k = t = acc = NaN;
+            G[1:100000] = NaN;
+            F[1:100000] = NaN;
+        end
+        allGrads[1:k, j] = G;
+        allFVals[1:k, j] = F;
+        allAcc[j] = acc;
+        allTimes[j] = t;
+        allIters[j] = k;
+    end
+    println("Function $functionName completed successfully.")
+    return allGrads, allFVals, allAcc, allTimes, allIters
 end

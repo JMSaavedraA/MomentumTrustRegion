@@ -1,7 +1,7 @@
 include("s2mpjlib.jl")
 
 
-names = [
+functionsToTest = [
     "AIRCRFTB",
     "ALLINIT",
     "ALLINITU",
@@ -359,13 +359,3 @@ names = [
     "ZANGWIL2"
 ]
 
-
-function loadproblem(name::String)
-    # Load the problem from the file
-    filename = "julia_problems/$name.jl";
-    include(filename);
-end
-
-for f in names
-    loadproblem(f)
-end
