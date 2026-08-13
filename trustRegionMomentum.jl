@@ -1,5 +1,6 @@
-#Jose Miguel Saavedra Aguilar
-#CIMAT Master in Applied Mathematics
+#Jose Saavedra and Oscar Dalmau, 2026
+#CIMAT
+#A Momentum Trust-Region Algorithm for Unconstrained Optimization
 
 using LinearAlgebra
 
