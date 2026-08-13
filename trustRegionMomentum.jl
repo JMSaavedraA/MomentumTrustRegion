@@ -62,7 +62,7 @@ function updateΔ(Δ, ρ, c1, c2, η, ΔMin, ΔMax, d, c)
 end
 
 """
-dogleg(Δ, g, B, pU, pN, d; tol=1e-6, dim=length(g))
+dogleg(Δ, g, B, pU, pN, d)
 
 Solve the trust-region subproblem approximately using the Dogleg method.
 
@@ -83,7 +83,7 @@ Arguments
 Returns
 - `c` : String code describing which region was selected ("C","N","D").
 """
-function dogleg(Δ::Number,g::AbstractVector,B::AbstractMatrix, pU::AbstractVector, pN::AbstractVector, d::AbstractVector, tol::Number=1e-6,dim=length(g))
+function dogleg(Δ::Number,g::AbstractVector,B::AbstractMatrix, pU::AbstractVector, pN::AbstractVector, d::AbstractVector)
     # Compute the scaled steepest-descent (Cauchy) point pU
     @inbounds pU .= - (g⋅g) / (g⋅(B*g)) * g
     NpU = norm(pU)
@@ -217,7 +217,7 @@ function trustRegionDoglegBFGS(pb::PB, pbm::PBM, f::Function)
         catch
             B = Matrix{Float64}(I, n, n)
         end
-        c = dogleg(Δ, g, B, pU, pN, d, tol, n)
+        c = dogleg(Δ, g, B, pU, pN, d)
         @. xs = x + d
         try
             # Evaluate the objective at the candidate step and compute the trust ratio
@@ -373,7 +373,7 @@ function trustRegionDoglegDampedBFGS(pb::PB, pbm::PBM, f::Function)
         catch
             B = Matrix{Float64}(I, n, n)
         end
-        c = dogleg(Δ, g, B, pU, pN, d, tol, n)
+        c = dogleg(Δ, g, B, pU, pN, d)
         @. xs = x + d
         try
             # Evaluate the objective at the candidate step and compute the trust ratio
@@ -520,7 +520,7 @@ function trustRegionDoglegHessian(pb::PB, pbm::PBM, f::Function)
         catch
             B = Matrix{Float64}(I, n, n)
         end
-        c = dogleg(Δ, g, B, pU, pN, d, tol, n)
+        c = dogleg(Δ, g, B, pU, pN, d)
         @. xs = x + d
         try
             f1 = evalgrsum!(xs, pbm, gs)
@@ -653,7 +653,7 @@ function trustRegionMomentumDoglegBFGS(pb::PB, pbm::PBM, f::Function)
             B = Matrix{Float64}(I, n, n)
         end
         
-        c = dogleg(Δ,g,B,pU,pN,d,tol,n) # Dogleg approximation of the quadratic model
+        c = dogleg(Δ,g,B,pU,pN,d) # Dogleg approximation of the quadratic model
         @. xs = x + v + d
         try
             f1 = evalgrsum!(xs, pbm, gs)
@@ -817,7 +817,7 @@ function trustRegionMomentumDoglegDampedBFGS(pb::PB, pbm::PBM, f::Function)
             B = Matrix{Float64}(I, n, n)
         end
         
-        c = dogleg(Δ,g,B,pU,pN,d,tol,n) # Dogleg approximation of the quadratic model
+        c = dogleg(Δ,g,B,pU,pN,d) # Dogleg approximation of the quadratic model
         @. xs = x + v + d
         try
             f1 = evalgrsum!(xs, pbm, gs)
@@ -980,7 +980,7 @@ function trustRegionMomentumDoglegHessian(pb::PB, pbm::PBM, f::Function)
             B = Matrix{Float64}(I, n, n)
         end
         
-        c = dogleg(Δ,g,B,pU,pN,d,tol,n) # Dogleg approximation of the quadratic model
+        c = dogleg(Δ,g,B,pU,pN,d) # Dogleg approximation of the quadratic model
         
         @. xs = x + v + d
         try
